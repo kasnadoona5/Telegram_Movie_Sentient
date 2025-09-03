@@ -1,1 +1,461 @@
-1
+{
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        176,
+        80
+      ],
+      "id": "62b1b3a6-9ed2-4101-b04c-774f87ce5ca4",
+      "name": "Telegram Trigger"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.choices[0].message.content }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1920,
+        -160
+      ],
+      "id": "749c98ec-8171-41a6-80f3-2f776e573f54",
+      "name": "Send a text message"
+    },
+    {
+      "parameters": {
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "UserID",
+              "lookupValue": "={{ $json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        80
+      ],
+      "id": "c48b6182-f167-46cb-8fb1-b86fd10fdf82",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cb4bf3c8-0514-496c-87ff-c9e84be1440b",
+              "leftValue": "={{ $json.UserID }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        80
+      ],
+      "id": "e95923fd-632e-48e0-9af2-e1f37dbb66a3",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ee50097c-a0e3-4a30-8ee1-dbfc93c204e8",
+              "leftValue": "={{ $json.MessageCount }}",
+              "rightValue": 4,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1376,
+        240
+      ],
+      "id": "6e9c7ccf-4e36-4222-a256-4cb938551082",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "You sent more than 3 Messages today, Come back tomorrow!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1968,
+        176
+      ],
+      "id": "5e162a13-fbc2-48b6-8dd2-73155f48ff1a",
+      "name": "Send a text message1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a057ede9-7b4c-4622-91bd-9291f5b55542",
+              "leftValue": "={{ $json.Date }}",
+              "rightValue": "={{ $today }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        240
+      ],
+      "id": "a4e77485-1497-4d58-b548-2d70ebc41a03",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "UserID": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+            "MessageCount": "1",
+            "Date": "={{ $today }}"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        -32
+      ],
+      "id": "504886af-f88a-4892-9b3e-7fa847c8af11",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "UserID": "={{ $json.UserID }}",
+            "MessageCount": "1",
+            "Date": "={{ $today }}"
+          },
+          "matchingColumns": [
+            "UserID"
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1072,
+        432
+      ],
+      "id": "493da86c-dadf-4103-b4b5-d5788c41d5d9",
+      "name": "Append or update row in sheet"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "UserID": "={{ $json.UserID }}",
+            "Date": "={{ $today }}",
+            "MessageCount": "={{ $json.MessageCount +1}}"
+          },
+          "matchingColumns": [
+            "UserID"
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1728,
+        448
+      ],
+      "id": "07af73cb-6df3-4cde-b6ef-2c7b1d660cba",
+      "name": "Append or update row in sheet1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fireworks.ai/inference/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"accounts/sentientfoundation-serverless/models/dobby-mini-unhinged-plus-llama-3-1-8b\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"={{ `CRITICAL: You MUST return ONLY valid JSON. No explanations, no markdown, or extra text.\\\\n\\\\nYour task is to analyze the user's request about movies and construct a JSON object to call the TMDb API. You must determine the best endpoint and parameters based on the user's message.\\\\n\\\\nAPI ENDPOINT DOCUMENTATION:\\\\n1. Search for a specific movie:\\\\n   - endpoint: \\\\\\\"search/movie\\\\\\\"\\\\n   - description: Use when the user wants to find a specific movie by its title.\\\\n   - parameters: {\\\\\\\"query\\\\\\\": \\\\\\\"Movie Title\\\\\\\"}\\\\n\\\\n2. Search for a person (actor, director):\\\\n   - endpoint: \\\\\\\"search/person\\\\\\\"\\\\n   - description: Use when the user asks for movies starring a specific actor. This is the FIRST step to get the person's ID.\\\\n   - parameters: {\\\\\\\"query\\\\\\\": \\\\\\\"Person's Name\\\\\\\"}\\\\n\\\\n3. Discover movies with filters:\\\\n   - endpoint: \\\\\\\"discover/movie\\\\\\\"\\\\n   - description: Use when the user wants to find movies based on criteria like genre, year, or actor ID.\\\\n   - parameters: {\\\\\\\"with_genres\\\\\\\": \\\\\\\"genre_id\\\\\\\"}, {\\\\\\\"primary_release_year\\\\\\\": \\\\\\\"year\\\\\\\"}, {\\\\\\\"with_cast\\\\\\\": \\\\\\\"person_id\\\\\\\"}\\\\n\\\\n4. Get lists of movies:\\\\n   - endpoint: \\\\\\\"movie/popular\\\\\\\" for popular movies.\\\\n   - endpoint: \\\\\\\"movie/top_rated\\\\\\\" for top-rated movies.\\\\n   - endpoint: \\\\\\\"movie/upcoming\\\\\\\" for upcoming movies.\\\\n\\\\n5. Get Recommendations (Multi-Step):\\\\n   - description: If a user asks for movies \\\\\\\"like\\\\\\\" or \\\\\\\"similar to\\\\\\\" another movie, you must first find that movie's ID.\\\\n   - action: Set a \\\\\\\"follow_up\\\\\\\": \\\\\\\"recommendations\\\\\\\" key in your JSON output. The 'endpoint' should be 'search/movie' to find the initial movie.\\\\n   - example: {\\\\\\\"endpoint\\\\\\\": \\\\\\\"search/movie\\\\\\\", \\\\\\\"parameters\\\\\\\": {\\\\\\\"query\\\\\\\": \\\\\\\"Inception\\\\\\\"}, \\\\\\\"follow_up\\\\\\\": \\\\\\\"recommendations\\\\\\\"}\\\\n\\\\nGENRE ID MAPPING:\\\\nYou MUST use the ID, not the name, for genres.\\\\n- Action: 28\\\\n- Comedy: 35\\\\n- Drama: 18\\\\n- Horror: 27\\\\n- Science Fiction: 878\\\\n- Thriller: 53\\\\n\\\\nRULES:\\\\n1. For actor queries, always use 'search/person'.\\\\n2. For genre queries, use 'discover/movie' with the correct 'with_genres' ID.\\\\n3. If the query is unclear, return: {\\\\\\\"error\\\\\\\": \\\\\\\"Invalid query\\\\\\\", \\\\\\\"originalMessage\\\\\\\": \\\\\\\"User's original message\\\\\\\"}.\\\\n\\\\nEXAMPLES:\\\\n\\\\nUser Message: \\\\\\\"Tell me about Pulp Fiction\\\\\\\"\\\\nJSON Output:\\\\n{\\\\\\\"endpoint\\\\\\\": \\\\\\\"search/movie\\\\\\\", \\\\\\\"parameters\\\\\\\": {\\\\\\\"query\\\\\\\": \\\\\\\"Pulp Fiction\\\\\\\"}\\\\n\\\\nUser Message: \\\\\\\"Show me popular movies\\\\\\\"\\\\nJSON Output:\\\\n{\\\\\\\"endpoint\\\\\\\": \\\\\\\"movie/popular\\\\\\\", \\\\\\\"parameters\\\\\\\": {}\\\\n\\\\nUser Message: \\\\\\\"Find movies starring Tom Hanks\\\\\\\"\\\\nJSON Output:\\\\n{\\\\\\\"endpoint\\\\\\\": \\\\\\\"search/person\\\\\\\", \\\\\\\"parameters\\\\\\\": {\\\\\\\"query\\\\\\\": \\\\\\\"Tom Hanks\\\\\\\"}\\\\n\\\\nUser Message: \\\\\\\"I want a good horror movie from 2022\\\\\\\"\\\\nJSON Output:\\\\n{\\\\\\\"endpoint\\\\\\\": \\\\\\\"discover/movie\\\\\\\", \\\\\\\"parameters\\\\\\\": {\\\\\\\"with_genres\\\\\\\": \\\\\\\"27\\\\\\\", \\\\\\\"primary_release_year\\\\\\\": \\\\\\\"2022\\\\\\\"}\\\\n\\\\nUser Message: \\\\\\\"Recommend movies similar to The Matrix\\\\\\\"\\\\nJSON Output:\\\\n{\\\\\\\"endpoint\\\\\\\": \\\\\\\"search/movie\\\\\\\", \\\\\\\"parameters\\\\\\\": {\\\\\\\"query\\\\\\\": \\\\\\\"The Matrix\\\\\\\"}, \\\\\\\"follow_up\\\\\\\": \\\\\\\"recommendations\\\\\\\"}\\\\n\\\\nUser Message: \\\\\\\"blurgh\\\\\\\"\\\\nJSON Output:\\\\n{\\\\\\\"error\\\\\\\": \\\\\\\"Invalid query\\\\\\\", \\\\\\\"originalMessage\\\\\\\": \\\\\\\"blurgh\\\\\\\"}\\\\n\\\\nRETURN ONLY THE JSON OBJECT.` }}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($('Telegram Trigger').item.json.message.text) }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2144,
+        240
+      ],
+      "id": "433a178a-7b82-496a-ba65-02abf82cf72c",
+      "name": "HTTP Request1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- ACTION REQUIRED ---\n// Paste your TMDb API Key in the line below.\nconst TMDB_API_KEY = 'YOUR_TMDB_API_KEY_HERE';\n// --- END OF ACTION ---\n\n\n// --- Step 1: Resiliently Parse the AI's Response ---\nconst aiContentString = $input.first().json.choices[0].message.content;\nlet parsedContent;\n\ntry {\n  const startIndex = aiContentString.indexOf('{');\n  const endIndex = aiContentString.lastIndexOf('}');\n  if (startIndex === -1 || endIndex === -1) {\n    throw new Error(\"The AI response did not contain a valid JSON object.\");\n  }\n  const jsonString = aiContentString.substring(startIndex, endIndex + 1);\n  parsedContent = JSON.parse(jsonString);\n} catch (error) {\n  return [{ json: { error: \"Failed to parse the AI's response.\", details: error.message } }];\n}\n\n\n// --- Step 2: Handle AI-Generated Errors ---\nif (parsedContent.error) {\n  return [{ json: { error: parsedContent.error, originalMessage: parsedContent.originalMessage } }];\n}\n\n\n// --- Step 3: Call the TMDb API based on the parsed command ---\ntry {\n  const baseUrl = 'https://api.themoviedb.org/3/';\n  let finalResults;\n  let queryType = parsedContent.endpoint; // For context in the next step\n\n  // SCENARIO A: It's a multi-step request to find an actor's movies\n  if (parsedContent.endpoint === 'search/person') {\n    const personSearchUrl = `${baseUrl}search/person`;\n    const personResponse = await this.helpers.httpRequest({\n      method: 'GET',\n      url: personSearchUrl,\n      qs: { api_key: TMDB_API_KEY, query: parsedContent.parameters.query },\n      json: true,\n    });\n\n    if (!personResponse.results || personResponse.results.length === 0) {\n      return [{ json: { error: `I couldn't find anyone named '${parsedContent.parameters.query}'.` } }];\n    }\n    \n    const personId = personResponse.results[0].id;\n    const personName = personResponse.results[0].name;\n    queryType = 'person_movies'; // Update the query type for the next AI\n\n    const movieSearchUrl = `${baseUrl}discover/movie`;\n    const movieResponse = await this.helpers.httpRequest({\n        method: 'GET',\n        url: movieSearchUrl,\n        qs: { api_key: TMDB_API_KEY, with_cast: personId, sort_by: 'popularity.desc' },\n        json: true\n    });\n    finalResults = { personName: personName, movies: movieResponse.results.slice(0, 5) }; // Get top 5 movies\n  }\n  // SCENARIO B: It's a multi-step request to find recommendations\n  else if (parsedContent.follow_up === 'recommendations') {\n    const movieSearchUrl = `${baseUrl}search/movie`;\n    const movieResponse = await this.helpers.httpRequest({\n        method: 'GET',\n        url: movieSearchUrl,\n        qs: { api_key: TMDB_API_KEY, query: parsedContent.parameters.query },\n        json: true,\n    });\n\n    if (!movieResponse.results || movieResponse.results.length === 0) {\n        return [{ json: { error: `I couldn't find a movie called '${parsedContent.parameters.query}' to get recommendations.` } }];\n    }\n\n    const movieId = movieResponse.results[0].id;\n    const movieTitle = movieResponse.results[0].title;\n    queryType = 'recommendations'; // Update the query type for the next AI\n\n    const recommendationsUrl = `${baseUrl}movie/${movieId}/recommendations`;\n    const recommendationsResponse = await this.helpers.httpRequest({\n        method: 'GET',\n        url: recommendationsUrl,\n        qs: { api_key: TMDB_API_KEY },\n        json: true\n    });\n    finalResults = { movieTitle: movieTitle, recommendations: recommendationsResponse.results.slice(0, 5) };\n  }\n  // SCENARIO C: It's a direct, single-step request\n  else {\n    const apiUrl = baseUrl + parsedContent.endpoint;\n    const response = await this.helpers.httpRequest({\n      method: 'GET',\n      url: apiUrl,\n      qs: { ...parsedContent.parameters, api_key: TMDB_API_KEY },\n      json: true,\n    });\n    finalResults = parsedContent.endpoint.startsWith('search/') ? response.results[0] : response.results.slice(0,5);\n  }\n\n  if (!finalResults || (Array.isArray(finalResults) && finalResults.length === 0)) {\n    return [{ json: { error: \"I found a category for that, but there were no results.\" } }];\n  }\n\n  // SUCCESS: Return the data and the type of query for the next AI node.\n  return [{ json: { data: finalResults, queryType: queryType } }];\n\n} catch (error) {\n  console.error(\"An unexpected error occurred during the API call:\", error);\n  return [{ json: { error: \"An unexpected error occurred while fetching movie data.\", details: error.message } }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2352,
+        240
+      ],
+      "id": "57bb9d72-600f-4412-9436-1d8ce8a8efd5",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fireworks.ai/inference/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"accounts/sentientfoundation-serverless/models/dobby-mini-unhinged-plus-llama-3-1-8b\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"{{ `You are Dobby by Sentient, a helpful AI house-elf and a massive film enthusiast. You are here to help 'Master' (the user).\\\\n\\\\nCRITICAL RULES:\\\\n1. ALWAYS speak in the third person, like Dobby (e.g., \\\\\\\"Dobby has found...\\\\\\\", not \\\\\\\"I have found...\\\\\\\").\\\\n2. **USE YOUR OWN KNOWLEDGE!** Do not just repeat the data you are given.\\\\n3. **For movie names and person names, use quotation marks. (e.g., \\\\\"Pulp Fiction\\\\\", \\\\\"Tom Hanks\\\\\") also add the realesed year of the movie.** \\\\n4 Be witty, eccentric, and charming, but always helpful.\\\\n5. Use simple words and talk straight forward - no complex explanations.\\\\n6. Add a little sense of humor, but not too much - keep it light and friendly.\\\\n7. Do NOT return JSON. Only return the final, natural language text response for Telegram.\\\\n\\\\n` }}\"\n    },\n    {\n      \"role\": 'user',\n      \"content\": {{ JSON.stringify(\"User asked: \" + $('Telegram Trigger').item.json.message.text + \"\\n\\nTMDb API returned: \" + JSON.stringify($json)) }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2736,
+        224
+      ],
+      "id": "39e67ee1-9c05-4d8d-878e-2b9640e7ba83",
+      "name": "HTTP Request",
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
